@@ -8,6 +8,7 @@ public static class HeroEndpoints
 {
     public static void MapHeroEndpoints(this WebApplication app)
     {
+        // TODO: Move to GetAllHeroesQuery in Application layer
         app.MapGet(ApiRoutes.Heroes.Base, async (HeroBoxDbContext db) =>
             await db.Heroes
                 .Select(h => new 
@@ -26,6 +27,7 @@ public static class HeroEndpoints
             .WithName("GetAllHeroes")
             .WithOpenApi();
 
+        // TODO: Move to GetHeroByIdQuery in Application layer
         app.MapGet(ApiRoutes.Heroes.ById, async (Guid id, HeroBoxDbContext db) =>
             await db.Heroes.FindAsync(id) is Hero hero
                 ? Results.Ok(new ApiResponse<Hero>(true, "Hero found", hero))
@@ -33,6 +35,7 @@ public static class HeroEndpoints
             .WithName("GetHeroById")
             .WithOpenApi();
 
+        // TODO: Move to CreateHeroCommand in Application layer
         app.MapPost(ApiRoutes.Heroes.Base, async (Hero hero, HeroBoxDbContext db) =>
         {
             hero.Id = Guid.NewGuid();
@@ -49,6 +52,7 @@ public static class HeroEndpoints
         .WithName("CreateHero")
         .WithOpenApi();
 
+        // TODO: Move to UpdateHeroCommand in Application layer
         app.MapPut(ApiRoutes.Heroes.ById, async (Guid id, Hero updatedHero, HeroBoxDbContext db) =>
         {
             var hero = await db.Heroes.FindAsync(id);
@@ -68,6 +72,7 @@ public static class HeroEndpoints
         .WithName("UpdateHero")
         .WithOpenApi();
 
+        // TODO: Move to DeleteHeroCommand in Application layer
         app.MapDelete(ApiRoutes.Heroes.ById, async (Guid id, HeroBoxDbContext db) =>
         {
             var hero = await db.Heroes.FindAsync(id);

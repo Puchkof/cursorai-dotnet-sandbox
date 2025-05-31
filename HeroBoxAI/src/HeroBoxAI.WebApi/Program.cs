@@ -1,6 +1,8 @@
 using HeroBoxAI.Infrastructure;
 using HeroBoxAI.Application;
 using HeroBoxAI.WebApi.Endpoints;
+using HeroBoxAI.WebApi.Middleware;
+using HeroBoxAI.WebApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,13 @@ builder.Services.AddApplicationServices();
 // Add infrastructure services (including DbContext)
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+// Add JWT Authentication
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+// Add global exception handler
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 // Apply database migrations regardless of environment
@@ -27,7 +36,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Add exception handling middleware
+app.UseExceptionHandler();
+
 app.UseHttpsRedirection();
+
+// Add authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Register API endpoints by domain
 app.MapUserEndpoints();

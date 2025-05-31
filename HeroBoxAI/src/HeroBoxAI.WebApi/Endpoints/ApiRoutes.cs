@@ -7,9 +7,17 @@ public static class ApiRoutes
 {
     public const string ApiPrefix = "/api";
     
+    public static class Auth
+    {
+        public const string Base = ApiPrefix + "/auth";
+        public const string SignUp = Base + "/signup";
+        public const string SignIn = Base + "/signin";
+    }
+    
     public static class Users
     {
         public const string Base = ApiPrefix + "/users";
+        public const string Me = Base + "/me";
         public const string ById = Base + "/{id:guid}";
         public const string Heroes = ById + "/heroes";
     }

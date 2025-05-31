@@ -1,0 +1,55 @@
+# Ignore build outputs
+**/bin/
+**/obj/
+**/out/
+
+# Ignore test projects
+tests/
+
+# Ignore IDE files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore package files
+*.nupkg
+*.snupkg
+
+# Ignore git
+.git/
+.gitignore
+.gitattributes
+
+# Ignore Docker files
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Ignore documentation
+README.md
+*.md
+
+# Ignore configuration files that shouldn't be in container
+appsettings.Development.json
+appsettings.Local.json 

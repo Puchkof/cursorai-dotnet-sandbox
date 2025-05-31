@@ -2,8 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using HeroBoxAI.Application.Common.Interfaces;
+using HeroBoxAI.Domain.Entities;
+using HeroBoxAI.Domain.Enums;
 using HeroBoxAI.Infrastructure;
 using HeroBoxAI.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
@@ -55,6 +59,54 @@ public class ApiTestFixture : WebApplicationFactory<Program>, IAsyncLifetime
     public new HttpClient CreateClient()
     {
         return base.CreateClient();
+    }
+
+    /// <summary>
+    /// Creates an authenticated HTTP client with a JWT token for the specified user
+    /// </summary>
+    public async Task<HttpClient> CreateAuthenticatedClientAsync(User user)
+    {
+        var client = CreateClient();
+        
+        using var scope = Services.CreateScope();
+        var jwtTokenService = scope.ServiceProvider.GetRequiredService<IJwtTokenService>();
+        var token = jwtTokenService.GenerateToken(user);
+        
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return client;
+    }
+
+    /// <summary>
+    /// Creates a test user and returns an authenticated HTTP client
+    /// </summary>
+    public async Task<(HttpClient Client, User User)> CreateAuthenticatedClientWithUserAsync(
+        string? username = null, 
+        string? email = null, 
+        UserRole role = UserRole.Player)
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = username ?? $"testuser_{uniqueId}",
+            Email = email ?? $"test_{uniqueId}@example.com",
+            PasswordHash = "hashedpassword", // This won't be used for JWT generation
+            Role = role,
+            Status = UserStatus.Active,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // Add user to database
+        using (var scope = Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<HeroBoxDbContext>();
+            dbContext.Users.Add(user);
+            await dbContext.SaveChangesAsync();
+        }
+
+        var client = await CreateAuthenticatedClientAsync(user);
+        return (client, user);
     }
 
     public async Task InitializeAsync()

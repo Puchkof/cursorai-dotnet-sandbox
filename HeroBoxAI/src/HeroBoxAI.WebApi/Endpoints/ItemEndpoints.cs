@@ -8,6 +8,7 @@ public static class ItemEndpoints
 {
     public static void MapItemEndpoints(this WebApplication app)
     {
+        // TODO: Move to GetAllItemsQuery in Application layer
         app.MapGet(ApiRoutes.Items.Base, async (HeroBoxDbContext db) =>
             await db.Items
                 .Select(i => new 
@@ -28,6 +29,7 @@ public static class ItemEndpoints
             .WithName("GetAllItems")
             .WithOpenApi();
 
+        // TODO: Move to GetItemByIdQuery in Application layer
         app.MapGet(ApiRoutes.Items.ById, async (Guid id, HeroBoxDbContext db) =>
             await db.Items.FindAsync(id) is Item item
                 ? Results.Ok(new ApiResponse<Item>(true, "Item found", item))
@@ -35,6 +37,7 @@ public static class ItemEndpoints
             .WithName("GetItemById")
             .WithOpenApi();
 
+        // TODO: Move to GetHeroItemsQuery in Application layer
         app.MapGet(ApiRoutes.Heroes.Items, async (Guid id, HeroBoxDbContext db) =>
             await db.Items.Where(i => i.HeroId == id).ToListAsync() is List<Item> items
                 ? Results.Ok(new ApiResponse<List<Item>>(true, "Items found", items))
@@ -42,6 +45,7 @@ public static class ItemEndpoints
             .WithName("GetHeroItems")
             .WithOpenApi();
 
+        // TODO: Move to CreateItemCommand in Application layer
         app.MapPost(ApiRoutes.Items.Base, async (Item item, HeroBoxDbContext db) =>
         {
             item.Id = Guid.NewGuid();
@@ -57,6 +61,7 @@ public static class ItemEndpoints
         .WithName("CreateItem")
         .WithOpenApi();
 
+        // TODO: Move to UpdateItemCommand in Application layer
         app.MapPut(ApiRoutes.Items.ById, async (Guid id, Item updatedItem, HeroBoxDbContext db) =>
         {
             var item = await db.Items.FindAsync(id);
@@ -79,6 +84,7 @@ public static class ItemEndpoints
         .WithName("UpdateItem")
         .WithOpenApi();
 
+        // TODO: Move to DeleteItemCommand in Application layer
         app.MapDelete(ApiRoutes.Items.ById, async (Guid id, HeroBoxDbContext db) =>
         {
             var item = await db.Items.FindAsync(id);
