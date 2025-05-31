@@ -21,6 +21,7 @@ public class ClanRepository : Repository<Clan>, IClanRepository
         return await _dbContext.Clans
             .Include(c => c.Founder)
             .Include(c => c.Members)
+                .ThenInclude(m => m.Heroes)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 

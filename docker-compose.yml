@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: heroboxai-postgres
+    environment:
+      POSTGRES_DB: heroboxai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - heroboxai-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d heroboxai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # HeroBoxAI Web API
+  heroboxai-api:
+    build:
+      context: ./HeroBoxAI
+      dockerfile: Dockerfile
+    container_name: heroboxai-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=heroboxai;Username=postgres;Password=postgres
+      - JwtSettings__SecretKey=YourSuperSecretKeyThatIsAtLeast32CharactersLongForSecurity!
+      - JwtSettings__Issuer=HeroBoxAI
+      - JwtSettings__Audience=HeroBoxAI-Users
+      - JwtSettings__ExpiryInMinutes=60
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - heroboxai-network
+    volumes:
+      - ./HeroBoxAI/logs:/app/logs
+    restart: unless-stopped
+
+  # pgAdmin (Optional - for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: heroboxai-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@heroboxai.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - heroboxai-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  heroboxai-network:
+    driver: bridge 

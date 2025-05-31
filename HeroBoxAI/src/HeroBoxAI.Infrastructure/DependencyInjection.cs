@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using HeroBoxAI.Domain.Repositories;
 using HeroBoxAI.Infrastructure.Data;
 using HeroBoxAI.Infrastructure.Repositories;
+using HeroBoxAI.Application.Common.Interfaces;
+using HeroBoxAI.Infrastructure.Services;
 using System.Threading.Tasks;
 
 namespace HeroBoxAI.Infrastructure
@@ -22,8 +24,15 @@ namespace HeroBoxAI.Infrastructure
             // Register repositories
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IClanRepository, ClanRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             
-            // Add additional infrastructure services here
+            // Register authentication services
+            services.AddScoped<IPasswordHashService, PasswordHashService>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<IUserContext, UserContext>();
+            
+            // Register HttpContextAccessor for UserContext
+            services.AddHttpContextAccessor();
             
             return services;
         }
